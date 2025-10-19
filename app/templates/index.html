@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto text-center">
+        <h1 class="display-4 mb-4">Welcome to LifeSync</h1>
+        <p class="lead mb-5">Track your daily activities, meals, exercise routines, and body metrics to achieve your health goals with data-driven insights.</p>
+        
+        <div class="row mb-5">
+            <div class="col-md-2 mb-3">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="fas fa-utensils fa-2x text-primary mb-2"></i>
+                        <h6>Meal Tracking</h6>
+                        <p class="text-muted small">Log meals with detailed nutrition</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="fas fa-dumbbell fa-2x text-success mb-2"></i>
+                        <h6>Workouts</h6>
+                        <p class="text-muted small">Track exercise and calories burned</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="fas fa-bed fa-2x text-info mb-2"></i>
+                        <h6>Sleep Tracking</h6>
+                        <p class="text-muted small">Monitor sleep quality and duration</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="fas fa-walking fa-2x text-warning mb-2"></i>
+                        <h6>Steps Counter</h6>
+                        <p class="text-muted small">Daily step tracking and distance</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="fas fa-weight fa-2x text-secondary mb-2"></i>
+                        <h6>Body Stats</h6>
+                        <p class="text-muted small">Monitor weight and body metrics</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="fas fa-user-md fa-2x text-danger mb-2"></i>
+                        <h6>Dietitians</h6>
+                        <p class="text-muted small">Connect with nutrition experts</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if not current_user.is_authenticated %}
+        <div class="d-grid gap-2 d-md-block">
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg me-3">Get Started</a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg">Login</a>
+        </div>
+        {% else %}
+        <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">Go to Dashboard</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

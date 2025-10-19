@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2><i class="fas fa-robot"></i> AI Dietitian Chat - Dr. LifeSync</h2>
+        <p class="text-muted">Ask me anything about nutrition, fitness, or health! I have access to your personal health data.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card" style="height: 600px;">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-comments"></i> Chat with Dr. LifeSync</h5>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <div id="chat-messages" class="flex-grow-1 overflow-auto mb-3" style="max-height: 450px;">
+                    <div class="message ai-message">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="avatar bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="message-content bg-light p-3 rounded">
+                                <strong>Dr. LifeSync:</strong><br>
+                                Hello! I'm your AI Dietitian. I have access to your health data and can help you with personalized nutrition and fitness advice. What would you like to know?
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <input type="text" id="user-input" class="form-control" placeholder="Ask me about nutrition, workouts, sleep, or any health question..." maxlength="500">
+                    <button class="btn btn-primary" type="button" id="send-btn">
+                        <i class="fas fa-paper-plane"></i> Send
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-lightbulb"></i> Sample Questions You Can Ask</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-utensils text-success"></i> "What should I eat for breakfast?"</li>
+                            <li><i class="fas fa-dumbbell text-primary"></i> "How can I improve my workout routine?"</li>
+                            <li><i class="fas fa-weight text-warning"></i> "Am I eating enough calories?"</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-bed text-info"></i> "How can I sleep better?"</li>
+                            <li><i class="fas fa-heart text-danger"></i> "Is my BMI healthy?"</li>
+                            <li><i class="fas fa-apple-alt text-success"></i> "What foods should I avoid?"</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.message {
+    margin-bottom: 1rem;
+}
+
+.user-message {
+    text-align: right;
+}
+
+.user-message .message-content {
+    background-color: #007bff !important;
+    color: white;
+    margin-left: auto;
+    max-width: 70%;
+}
+
+.ai-message .message-content {
+    max-width: 80%;
+}
+
+.avatar {
+    min-width: 40px;
+}
+
+#chat-messages {
+    scroll-behavior: smooth;
+}
+
+.typing-indicator {
+    display: none;
+}
+
+.typing-indicator .dot {
+    animation: typing 1.4s infinite;
+    background-color: #999;
+    border-radius: 50%;
+    display: inline-block;
+    height: 8px;
+    margin: 0 2px;
+    width: 8px;
+}
+
+.typing-indicator .dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator .dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        transform: translateY(0);
+    }
+    30% {
+        transform: translateY(-10px);
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatMessages = document.getElementById('chat-messages');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    function addMessage(content, isUser = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+        
+        if (isUser) {
+            messageDiv.innerHTML = `
+                <div class="d-flex align-items-start mb-3 justify-content-end">
+                    <div class="message-content bg-primary text-white p-3 rounded">
+                        <strong>You:</strong><br>${content}
+                    </div>
+                    <div class="avatar bg-secondary text-white rounded-circle ms-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+            `;
+        } else {
+            messageDiv.innerHTML = `
+                <div class="d-flex align-items-start mb-3">
+                    <div class="avatar bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content bg-light p-3 rounded">
+                        <strong>Dr. LifeSync:</strong><br>${content}
+                    </div>
+                </div>
+            `;
+        }
+        
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function showTyping() {
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'typing-indicator';
+        typingDiv.innerHTML = `
+            <div class="d-flex align-items-start mb-3">
+                <div class="avatar bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content bg-light p-3 rounded">
+                    <strong>Dr. LifeSync is typing...</strong><br>
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                </div>
+            </div>
+        `;
+        typingDiv.style.display = 'block';
+        chatMessages.appendChild(typingDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        return typingDiv;
+    }
+
+    function sendMessage() {
+        const message = userInput.value.trim();
+        if (!message) return;
+
+        addMessage(message, true);
+        userInput.value = '';
+        sendBtn.disabled = true;
+
+        const typingIndicator = showTyping();
+
+        fetch('/chat_with_ai', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message: message })
+        })
+        .then(response => response.json())
+        .then(data => {
+            typingIndicator.remove();
+            addMessage(data.response);
+            sendBtn.disabled = false;
+        })
+        .catch(error => {
+            typingIndicator.remove();
+            addMessage('Sorry, I encountered an error. Please try again.');
+            sendBtn.disabled = false;
+        });
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    userInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+});
+</script>
+{% endblock %}

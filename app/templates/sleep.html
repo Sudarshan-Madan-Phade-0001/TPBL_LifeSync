@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-bed"></i> Add Sleep Record</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('add_sleep') }}">
+                    <div class="mb-3">
+                        <label for="sleep_time" class="form-label">Sleep Time</label>
+                        <input type="time" class="form-control" name="sleep_time" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="wake_time" class="form-label">Wake Time</label>
+                        <input type="time" class="form-control" name="wake_time" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="quality" class="form-label">Sleep Quality</label>
+                        <select class="form-control" name="quality" required>
+                            <option value="Poor">Poor</option>
+                            <option value="Fair">Fair</option>
+                            <option value="Good">Good</option>
+                            <option value="Excellent">Excellent</option>
+                        </select>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-info">Add Sleep Record</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Recent Sleep Records</h5>
+            </div>
+            <div class="card-body">
+                {% for sleep in sleep_records %}
+                <div class="mb-2 p-2 bg-light rounded">
+                    <strong>{{ sleep.date }}</strong><br>
+                    <small>{{ sleep.sleep_time.strftime('%H:%M') }} - {{ sleep.wake_time.strftime('%H:%M') }}</small>
+                    <div class="d-flex justify-content-between">
+                        <span class="badge bg-info">{{ "%.1f"|format(sleep.duration) }}h</span>
+                        <span class="badge bg-secondary">{{ sleep.quality }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-utensils"></i> Add Meal</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('add_meal') }}">
+                    <div class="mb-3">
+                        <label for="meal_type" class="form-label">Meal Type</label>
+                        <select class="form-control" name="meal_type" required>
+                            <option value="breakfast">Breakfast</option>
+                            <option value="lunch">Lunch</option>
+                            <option value="dinner">Dinner</option>
+                            <option value="snack">Snack</option>
+                        </select>
+                    </div>
+                    <div id="food-items">
+                        <div class="row mb-2">
+                            <div class="col-8">
+                                <select class="form-control" name="food_id" required>
+                                    <option value="">Select Food</option>
+                                    {% for food in foods %}
+                                    <option value="{{ food.id }}">{{ food.name }} ({{ food.calories_per_100g }} cal/100g)</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-4">
+                                <input type="number" class="form-control" name="quantity" placeholder="Grams" required>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm mb-3" onclick="addFoodItem()">Add Another Food</button>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success">Add Meal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Recent Meals</h5>
+            </div>
+            <div class="card-body">
+                {% for meal in user_meals %}
+                <div class="mb-2 p-2 bg-light rounded">
+                    <strong>{{ meal.meal_type.title() }}</strong> - {{ meal.date }}
+                    <span class="badge bg-primary float-end">{{ "%.0f"|format(meal.total_calories) }} cal</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function addFoodItem() {
+    const container = document.getElementById('food-items');
+    const newItem = container.children[0].cloneNode(true);
+    newItem.querySelectorAll('select, input').forEach(el => el.value = '');
+    container.appendChild(newItem);
+}
+</script>
+{% endblock %}
