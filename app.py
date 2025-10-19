@@ -4,7 +4,6 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, date, time, timedelta
 import os
-import json
 import requests
 from dotenv import load_dotenv
 
@@ -16,7 +15,7 @@ app.config['SECRET_KEY'] = 'your-secret-key-here'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///lifesync.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Multi-platform AI support - automatically tries available APIs
+
 
 db = SQLAlchemy(app)
 login_manager = LoginManager()
