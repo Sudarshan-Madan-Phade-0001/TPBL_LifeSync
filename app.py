@@ -12,7 +12,7 @@ load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///lifesync.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'mysql+pymysql://root:root@localhost/lifesync_db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
@@ -141,7 +141,8 @@ def register():
             age=age,
             height=height,
             weight=weight,
-            gender=gender
+            gender=gender,
+            activity_level=request.form.get('activity_level') or None
         )
         db.session.add(user)
         db.session.commit()
@@ -364,6 +365,15 @@ def chat_with_ai():
             pass
     
     return jsonify({'response': 'I am an AI assistant. How can I help you?'})
+
+@app.route('/update_activity_level', methods=['POST'])
+@login_required
+def update_activity_level():
+    activity_level = request.form.get('activity_level') or None
+    current_user.activity_level = activity_level
+    db.session.commit()
+    flash('Activity level updated successfully!')
+    return redirect(url_for('dashboard'))
 
 
 

@@ -8,4 +8,11 @@ services:
       - key: GEMINI_API_KEY
         value: AIzaSyCUeI2CsA8N2KMegUEtDBreE46ypLbCfvM
       - key: DATABASE_URL
-        value: sqlite:///lifesync.db
+        fromDatabase:
+          name: lifesync-mysql
+          property: connectionString
+
+databases:
+  - name: lifesync-mysql
+    databaseName: lifesync_db
+    user: lifesync_user

@@ -51,6 +51,42 @@
     </div>
 </div>
 
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <strong>Activity Level:</strong><br>
+                        <form method="POST" action="{{ url_for('update_activity_level') }}" class="d-inline">
+                            <select name="activity_level" class="form-select form-select-sm" onchange="this.form.submit()">
+                                <option value="" {% if not current_user.activity_level %}selected{% endif %}>Not Set</option>
+                                <option value="sedentary" {% if current_user.activity_level == 'sedentary' %}selected{% endif %}>Sedentary</option>
+                                <option value="light" {% if current_user.activity_level == 'light' %}selected{% endif %}>Light</option>
+                                <option value="moderate" {% if current_user.activity_level == 'moderate' %}selected{% endif %}>Moderate</option>
+                                <option value="active" {% if current_user.activity_level == 'active' %}selected{% endif %}>Active</option>
+                                <option value="very_active" {% if current_user.activity_level == 'very_active' %}selected{% endif %}>Very Active</option>
+                            </select>
+                        </form>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Age:</strong><br>
+                        <span>{{ current_user.age if current_user.age else 'Not Set' }} years</span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Height:</strong><br>
+                        <span>{{ current_user.height if current_user.height else 'Not Set' }} cm</span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Weight:</strong><br>
+                        <span>{{ current_user.weight if current_user.weight else 'Not Set' }} kg</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-md-6">
         <div class="card">
