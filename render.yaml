@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: lifesync-app
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      - key: GEMINI_API_KEY
+        value: AIzaSyCUeI2CsA8N2KMegUEtDBreE46ypLbCfvM
+      - key: DATABASE_URL
+        value: sqlite:///lifesync.db
