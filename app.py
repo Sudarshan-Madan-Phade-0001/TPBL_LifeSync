@@ -2,20 +2,13 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime, date, time, timedelta
+from datetime import datetime, date, time
 import os
-import requests
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'mysql+pymysql://root:root@localhost/lifesync_db')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/lifesync_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-
 
 db = SQLAlchemy(app)
 login_manager = LoginManager()
@@ -53,7 +46,6 @@ class Food(db.Model):
     fat = db.Column(db.Float)
     fiber = db.Column(db.Float)
     category = db.Column(db.String(50))
-    is_veg = db.Column(db.Boolean, default=True)
 
 class Meal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -141,8 +133,7 @@ def register():
             age=age,
             height=height,
             weight=weight,
-            gender=gender,
-            activity_level=request.form.get('activity_level') or None
+            gender=gender
         )
         db.session.add(user)
         db.session.commit()
@@ -200,7 +191,6 @@ def dashboard():
 @app.route('/meals')
 @login_required
 def meals():
-    # Show all foods (all are vegetarian now)
     foods = Food.query.all()
     user_meals = Meal.query.filter_by(user_id=current_user.id).order_by(Meal.date.desc()).limit(10).all()
     return render_template('meals.html', foods=foods, user_meals=user_meals)
@@ -275,7 +265,7 @@ def add_sleep():
     sleep_dt = datetime.combine(date.today(), sleep_time)
     wake_dt = datetime.combine(date.today(), wake_time)
     if wake_dt < sleep_dt:
-        wake_dt += timedelta(days=1)
+        wake_dt += datetime.timedelta(days=1)
     duration = (wake_dt - sleep_dt).total_seconds() / 3600
     
     sleep_record = Sleep(
@@ -344,27 +334,10 @@ def dietitian():
 @app.route('/chat_with_ai', methods=['POST'])
 @login_required
 def chat_with_ai():
+    from ai_service import get_ai_response
     user_message = request.json.get('message')
-    
-    api_key = os.getenv('GEMINI_API_KEY')
-    if api_key:
-        try:
-            response = requests.post(
-                f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}",
-                headers={'Content-Type': 'application/json'},
-                json={"contents": [{"parts": [{"text": user_message}]}]},
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                result = response.json()
-                if 'candidates' in result:
-                    ai_text = result['candidates'][0]['content']['parts'][0]['text']
-                    return jsonify({'response': ai_text})
-        except:
-            pass
-    
-    return jsonify({'response': 'I am an AI assistant. How can I help you?'})
+    ai_response = get_ai_response(user_message)
+    return jsonify({'response': ai_response})
 
 @app.route('/update_activity_level', methods=['POST'])
 @login_required
@@ -375,11 +348,10 @@ def update_activity_level():
     flash('Activity level updated successfully!')
     return redirect(url_for('dashboard'))
 
-
-
 @app.route('/analytics')
 @login_required
 def analytics():
+    from datetime import timedelta
     week_ago = date.today() - timedelta(days=7)
     
     weekly_meals = db.session.query(Meal.date, db.func.sum(Meal.total_calories)).filter(
@@ -403,24 +375,24 @@ def analytics():
                          weekly_steps=weekly_steps)
 
 def init_sample_data():
-    """Initialize sample vegetarian food data"""
+    """Initialize sample food data"""
     if Food.query.count() == 0:
         foods = [
-            Food(name='Rice', calories_per_100g=130, protein=2.7, carbs=28, fat=0.3, category='Grains', is_veg=True),
-            Food(name='Paneer', calories_per_100g=265, protein=18.3, carbs=1.2, fat=20.8, category='Dairy', is_veg=True),
-            Food(name='Broccoli', calories_per_100g=34, protein=2.8, carbs=7, fat=0.4, category='Vegetables', is_veg=True),
-            Food(name='Banana', calories_per_100g=89, protein=1.1, carbs=23, fat=0.3, category='Fruits', is_veg=True),
-            Food(name='Oats', calories_per_100g=389, protein=16.9, carbs=66, fat=6.9, category='Grains', is_veg=True),
-            Food(name='Spinach', calories_per_100g=23, protein=2.9, carbs=3.6, fat=0.4, category='Vegetables', is_veg=True),
-            Food(name='Lentils (Dal)', calories_per_100g=116, protein=9, carbs=20, fat=0.4, category='Legumes', is_veg=True),
-            Food(name='Almonds', calories_per_100g=579, protein=21.2, carbs=21.6, fat=49.9, category='Nuts', is_veg=True),
-            Food(name='Greek Yogurt', calories_per_100g=59, protein=10, carbs=3.6, fat=0.4, category='Dairy', is_veg=True),
-            Food(name='Quinoa', calories_per_100g=368, protein=14.1, carbs=64.2, fat=6.1, category='Grains', is_veg=True),
-            Food(name='Sweet Potato', calories_per_100g=86, protein=1.6, carbs=20.1, fat=0.1, category='Vegetables', is_veg=True),
-            Food(name='Chickpeas', calories_per_100g=164, protein=8.9, carbs=27.4, fat=2.6, category='Legumes', is_veg=True)
+            Food(name='Rice', calories_per_100g=130, protein=2.7, carbs=28, fat=0.3, category='Grains'),
+            Food(name='Chicken Breast', calories_per_100g=165, protein=31, carbs=0, fat=3.6, category='Protein'),
+            Food(name='Broccoli', calories_per_100g=34, protein=2.8, carbs=7, fat=0.4, category='Vegetables'),
+            Food(name='Banana', calories_per_100g=89, protein=1.1, carbs=23, fat=0.3, category='Fruits'),
+            Food(name='Oats', calories_per_100g=389, protein=16.9, carbs=66, fat=6.9, category='Grains')
         ]
         for food in foods:
             db.session.add(food)
+        
+        dietitians = [
+            Dietitian(name='Dr. Sarah Johnson', email='sarah@lifesync.com', specialization='Weight Management', experience_years=8, phone='555-0101'),
+            Dietitian(name='Dr. Mike Chen', email='mike@lifesync.com', specialization='Sports Nutrition', experience_years=5, phone='555-0102')
+        ]
+        for dietitian in dietitians:
+            db.session.add(dietitian)
         
         db.session.commit()
 
@@ -428,5 +400,5 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
         init_sample_data()
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    print("Starting LifeSync on http://127.0.0.1:8081")
+    app.run(host='localhost', port=0, debug=False, use_reloader=False)

@@ -3,7 +3,7 @@ import pymysql
 # Database connection parameters
 DB_HOST = 'localhost'
 DB_USER = 'root'
-DB_PASSWORD = 'root'
+DB_PASSWORD = 'root'  # Change this to your MySQL password
 DB_NAME = 'lifesync_db'
 
 def create_database():
