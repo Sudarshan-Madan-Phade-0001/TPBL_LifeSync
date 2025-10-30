@@ -21,7 +21,7 @@
                     <div id="food-items">
                         <div class="row mb-2">
                             <div class="col-8">
-                                <select class="form-control" name="food_id" required>
+                                <select class="form-control" name="food_id">
                                     <option value="">Select Food</option>
                                     {% for food in foods %}
                                     <option value="{{ food.id }}">{{ food.name }} ({{ food.calories_per_100g }} cal/100g)</option>
@@ -29,11 +29,26 @@
                                 </select>
                             </div>
                             <div class="col-4">
-                                <input type="number" class="form-control" name="quantity" placeholder="Grams" required>
+                                <input type="number" class="form-control" name="quantity" placeholder="Grams">
                             </div>
                         </div>
                     </div>
                     <button type="button" class="btn btn-secondary btn-sm mb-3" onclick="addFoodItem()">Add Another Food</button>
+                    
+                    <hr>
+                    <h6>Or Add Custom Food</h6>
+                    <div class="row mb-2">
+                        <div class="col-4">
+                            <input type="text" class="form-control" name="custom_food_name" placeholder="Food Name">
+                        </div>
+                        <div class="col-4">
+                            <input type="number" class="form-control" name="custom_calories" placeholder="Cal/100g">
+                        </div>
+                        <div class="col-4">
+                            <input type="number" class="form-control" name="custom_quantity" placeholder="Grams">
+                        </div>
+                    </div>
+                    
                     <div class="d-grid">
                         <button type="submit" class="btn btn-success">Add Meal</button>
                     </div>
@@ -65,5 +80,29 @@ function addFoodItem() {
     newItem.querySelectorAll('select, input').forEach(el => el.value = '');
     container.appendChild(newItem);
 }
+
+// Validate form before submission
+document.querySelector('form').addEventListener('submit', function(e) {
+    const foodSelects = document.querySelectorAll('select[name="food_id"]');
+    const quantities = document.querySelectorAll('input[name="quantity"]');
+    const customName = document.querySelector('input[name="custom_food_name"]').value;
+    const customCalories = document.querySelector('input[name="custom_calories"]').value;
+    const customQuantity = document.querySelector('input[name="custom_quantity"]').value;
+    
+    let hasExistingFood = false;
+    for (let i = 0; i < foodSelects.length; i++) {
+        if (foodSelects[i].value && quantities[i].value) {
+            hasExistingFood = true;
+            break;
+        }
+    }
+    
+    const hasCustomFood = customName && customCalories && customQuantity;
+    
+    if (!hasExistingFood && !hasCustomFood) {
+        e.preventDefault();
+        alert('Please select existing food items OR fill in custom food details.');
+    }
+});
 </script>
 {% endblock %}

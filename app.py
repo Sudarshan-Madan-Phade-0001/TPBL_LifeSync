@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime, date, time
+from datetime import datetime, date, time, timedelta
 import os
 
 app = Flask(__name__)
@@ -209,6 +209,7 @@ def add_meal():
     food_ids = request.form.getlist('food_id')
     quantities = request.form.getlist('quantity')
     
+    # Handle existing foods
     for food_id, quantity in zip(food_ids, quantities):
         if food_id and quantity:
             food = Food.query.get(food_id)
@@ -222,6 +223,33 @@ def add_meal():
                 calories=calories
             )
             db.session.add(meal_item)
+    
+    # Handle custom food
+    custom_food_name = request.form.get('custom_food_name')
+    custom_calories = request.form.get('custom_calories')
+    custom_quantity = request.form.get('custom_quantity')
+    
+    if custom_food_name and custom_calories and custom_quantity:
+        # Create new food item
+        new_food = Food(
+            name=custom_food_name,
+            calories_per_100g=float(custom_calories),
+            category='Custom'
+        )
+        db.session.add(new_food)
+        db.session.flush()
+        
+        # Add to meal
+        calories = (float(custom_calories) * float(custom_quantity)) / 100
+        total_calories += calories
+        
+        meal_item = MealItem(
+            meal_id=meal.id,
+            food_id=new_food.id,
+            quantity=float(custom_quantity),
+            calories=calories
+        )
+        db.session.add(meal_item)
     
     meal.total_calories = total_calories
     db.session.commit()
@@ -265,7 +293,7 @@ def add_sleep():
     sleep_dt = datetime.combine(date.today(), sleep_time)
     wake_dt = datetime.combine(date.today(), wake_time)
     if wake_dt < sleep_dt:
-        wake_dt += datetime.timedelta(days=1)
+        wake_dt += timedelta(days=1)
     duration = (wake_dt - sleep_dt).total_seconds() / 3600
     
     sleep_record = Sleep(
@@ -351,7 +379,6 @@ def update_activity_level():
 @app.route('/analytics')
 @login_required
 def analytics():
-    from datetime import timedelta
     week_ago = date.today() - timedelta(days=7)
     
     weekly_meals = db.session.query(Meal.date, db.func.sum(Meal.total_calories)).filter(
@@ -401,4 +428,4 @@ if __name__ == '__main__':
         db.create_all()
         init_sample_data()
     print("Starting LifeSync on http://127.0.0.1:8081")
-    app.run(host='localhost', port=0, debug=False, use_reloader=False)
+    app.run(host='localhost', port=3000, debug=True, use_reloader=False)
