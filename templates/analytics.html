@@ -27,10 +27,10 @@
     <div class="col-md-4">
         <div class="card">
             <div class="card-header">
-                <h5>Weekly Steps</h5>
+                <h5>Calorie Balance</h5>
             </div>
             <div class="card-body">
-                <canvas id="stepsChart" width="400" height="200"></canvas>
+                <canvas id="balanceChart" width="400" height="200"></canvas>
             </div>
         </div>
     </div>
@@ -111,21 +111,44 @@
         }
     });
 
-    // Steps Chart
-    const stepsData = {
-        labels: [{% for steps in weekly_steps %}'{{ steps[0].strftime("%m/%d") }}'{% if not loop.last %},{% endif %}{% endfor %}],
-        datasets: [{
-            label: 'Daily Steps',
-            data: [{% for steps in weekly_steps %}{{ steps[1] }}{% if not loop.last %},{% endif %}{% endfor %}],
-            borderColor: 'rgb(54, 162, 235)',
-            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-            tension: 0.1
-        }]
-    };
-
-    new Chart(document.getElementById('stepsChart'), {
-        type: 'line',
-        data: stepsData,
+    // Calorie Balance Chart
+    const balanceLabels = [];
+    const balanceData = [];
+    
+    // Create a combined dataset for calorie balance
+    const mealMap = new Map();
+    const workoutMap = new Map();
+    
+    {% for meal in weekly_meals %}
+    mealMap.set('{{ meal[0].strftime("%m/%d") }}', {{ meal[1] or 0 }});
+    {% endfor %}
+    
+    {% for workout in weekly_workouts %}
+    workoutMap.set('{{ workout[0].strftime("%m/%d") }}', {{ workout[1] or 0 }});
+    {% endfor %}
+    
+    // Get all unique dates
+    const allDates = new Set([...mealMap.keys(), ...workoutMap.keys()]);
+    
+    allDates.forEach(date => {
+        balanceLabels.push(date);
+        const consumed = mealMap.get(date) || 0;
+        const burned = workoutMap.get(date) || 0;
+        balanceData.push(consumed - burned);
+    });
+    
+    new Chart(document.getElementById('balanceChart'), {
+        type: 'bar',
+        data: {
+            labels: balanceLabels,
+            datasets: [{
+                label: 'Net Calories',
+                data: balanceData,
+                backgroundColor: balanceData.map(val => val > 0 ? 'rgba(255, 99, 132, 0.5)' : 'rgba(75, 192, 192, 0.5)'),
+                borderColor: balanceData.map(val => val > 0 ? 'rgb(255, 99, 132)' : 'rgb(75, 192, 192)'),
+                borderWidth: 1
+            }]
+        },
         options: {
             responsive: true,
             scales: {

@@ -12,43 +12,36 @@
                     <div class="mb-3">
                         <label for="meal_type" class="form-label">Meal Type</label>
                         <select class="form-control" name="meal_type" required>
-                            <option value="breakfast">Breakfast</option>
-                            <option value="lunch">Lunch</option>
-                            <option value="dinner">Dinner</option>
-                            <option value="snack">Snack</option>
+                            <option value="Breakfast">Breakfast</option>
+                            <option value="Lunch">Lunch</option>
+                            <option value="Dinner">Dinner</option>
+                            <option value="Snack">Snack</option>
                         </select>
                     </div>
-                    <div id="food-items">
-                        <div class="row mb-2">
-                            <div class="col-8">
-                                <select class="form-control" name="food_id">
-                                    <option value="">Select Food</option>
-                                    {% for food in foods %}
-                                    <option value="{{ food.id }}">{{ food.name }} ({{ food.calories_per_100g }} cal/100g)</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-4">
-                                <input type="number" class="form-control" name="quantity" placeholder="Grams">
-                            </div>
+                    <div class="mb-3">
+                        <label for="food_items" class="form-label">Food Items</label>
+                        <textarea class="form-control" id="food_items" name="food_items" rows="3" placeholder="Enter food items..." required></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="calories" class="form-label">Calories</label>
+                            <input type="number" step="0.1" class="form-control" id="calories" name="calories" placeholder="Total calories">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="protein_g" class="form-label">Protein (g)</label>
+                            <input type="number" step="0.1" class="form-control" id="protein_g" name="protein_g" placeholder="Protein in grams">
                         </div>
                     </div>
-                    <button type="button" class="btn btn-secondary btn-sm mb-3" onclick="addFoodItem()">Add Another Food</button>
-                    
-                    <hr>
-                    <h6>Or Add Custom Food</h6>
-                    <div class="row mb-2">
-                        <div class="col-4">
-                            <input type="text" class="form-control" name="custom_food_name" placeholder="Food Name">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="carbs_g" class="form-label">Carbs (g)</label>
+                            <input type="number" step="0.1" class="form-control" id="carbs_g" name="carbs_g" placeholder="Carbs in grams">
                         </div>
-                        <div class="col-4">
-                            <input type="number" class="form-control" name="custom_calories" placeholder="Cal/100g">
-                        </div>
-                        <div class="col-4">
-                            <input type="number" class="form-control" name="custom_quantity" placeholder="Grams">
+                        <div class="col-md-6 mb-3">
+                            <label for="fats_g" class="form-label">Fats (g)</label>
+                            <input type="number" step="0.1" class="form-control" id="fats_g" name="fats_g" placeholder="Fats in grams">
                         </div>
                     </div>
-                    
                     <div class="d-grid">
                         <button type="submit" class="btn btn-success">Add Meal</button>
                     </div>
@@ -64,8 +57,11 @@
             <div class="card-body">
                 {% for meal in user_meals %}
                 <div class="mb-2 p-2 bg-light rounded">
-                    <strong>{{ meal.meal_type.title() }}</strong> - {{ meal.date }}
-                    <span class="badge bg-primary float-end">{{ "%.0f"|format(meal.total_calories) }} cal</span>
+                    <strong>{{ meal.meal_type }}</strong> - {{ meal.date }}
+                    <br><small>{{ meal.food_items }}</small>
+                    {% if meal.calories %}
+                    <span class="badge bg-primary float-end">{{ "%.0f"|format(meal.calories) }} cal</span>
+                    {% endif %}
                 </div>
                 {% endfor %}
             </div>
@@ -73,36 +69,44 @@
     </div>
 </div>
 
-<script>
-function addFoodItem() {
-    const container = document.getElementById('food-items');
-    const newItem = container.children[0].cloneNode(true);
-    newItem.querySelectorAll('select, input').forEach(el => el.value = '');
-    container.appendChild(newItem);
-}
 
-// Validate form before submission
-document.querySelector('form').addEventListener('submit', function(e) {
-    const foodSelects = document.querySelectorAll('select[name="food_id"]');
-    const quantities = document.querySelectorAll('input[name="quantity"]');
-    const customName = document.querySelector('input[name="custom_food_name"]').value;
-    const customCalories = document.querySelector('input[name="custom_calories"]').value;
-    const customQuantity = document.querySelector('input[name="custom_quantity"]').value;
+<script>
+let debounceTimer;
+
+document.getElementById('food_items').addEventListener('input', function() {
+    const query = this.value.trim();
     
-    let hasExistingFood = false;
-    for (let i = 0; i < foodSelects.length; i++) {
-        if (foodSelects[i].value && quantities[i].value) {
-            hasExistingFood = true;
-            break;
-        }
-    }
+    if (query.length < 3) return;
     
-    const hasCustomFood = customName && customCalories && customQuantity;
-    
-    if (!hasExistingFood && !hasCustomFood) {
-        e.preventDefault();
-        alert('Please select existing food items OR fill in custom food details.');
-    }
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        fetchNutritionData(query);
+    }, 1000);
 });
+
+function fetchNutritionData(query) {
+    fetch('/get_nutrition', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({query: query})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            console.error('Error:', data.error);
+            return;
+        }
+        
+        document.getElementById('calories').value = Math.round(data.calories);
+        document.getElementById('protein_g').value = data.protein.toFixed(1);
+        document.getElementById('carbs_g').value = data.carbs.toFixed(1);
+        document.getElementById('fats_g').value = data.fat.toFixed(1);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
 </script>
 {% endblock %}

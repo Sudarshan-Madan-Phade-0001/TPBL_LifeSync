@@ -7,7 +7,6 @@
         <a href="{{ url_for('meals') }}" class="btn btn-success">Meals</a>
         <a href="{{ url_for('workouts') }}" class="btn btn-primary">Workouts</a>
         <a href="{{ url_for('sleep') }}" class="btn btn-info">Sleep</a>
-        <a href="{{ url_for('steps') }}" class="btn btn-warning">Steps</a>
         <a href="{{ url_for('body_stats') }}" class="btn btn-secondary">Body Stats</a>
     </div>
 </div>
@@ -34,9 +33,9 @@
     <div class="col-md-3">
         <div class="card metric-card">
             <div class="card-body text-center">
-                <i class="fas fa-walking fa-2x mb-2"></i>
-                <h4>{{ today_steps.step_count if today_steps else 0 }}</h4>
-                <p class="mb-0">Steps Today</p>
+                <i class="fas fa-balance-scale fa-2x mb-2"></i>
+                <h4>{{ "%.0f"|format(net_calories) }}</h4>
+                <p class="mb-0">Net Calories</p>
             </div>
         </div>
     </div>
@@ -44,8 +43,8 @@
         <div class="card metric-card">
             <div class="card-body text-center">
                 <i class="fas fa-bed fa-2x mb-2"></i>
-                <h4>{{ "%.1f"|format(today_sleep.duration) if today_sleep else "0.0" }}h</h4>
-                <p class="mb-0">Sleep Duration</p>
+                <h4>{{ "%.1f"|format(today_sleep.sleep_hours) if today_sleep and today_sleep.sleep_hours else "0.0" }}h</h4>
+                <p class="mb-0">Sleep Hours</p>
             </div>
         </div>
     </div>
@@ -56,30 +55,17 @@
         <div class="card">
             <div class="card-body">
                 <div class="row text-center">
-                    <div class="col-md-3">
-                        <strong>Activity Level:</strong><br>
-                        <form method="POST" action="{{ url_for('update_activity_level') }}" class="d-inline">
-                            <select name="activity_level" class="form-select form-select-sm" onchange="this.form.submit()">
-                                <option value="" {% if not current_user.activity_level %}selected{% endif %}>Not Set</option>
-                                <option value="sedentary" {% if current_user.activity_level == 'sedentary' %}selected{% endif %}>Sedentary</option>
-                                <option value="light" {% if current_user.activity_level == 'light' %}selected{% endif %}>Light</option>
-                                <option value="moderate" {% if current_user.activity_level == 'moderate' %}selected{% endif %}>Moderate</option>
-                                <option value="active" {% if current_user.activity_level == 'active' %}selected{% endif %}>Active</option>
-                                <option value="very_active" {% if current_user.activity_level == 'very_active' %}selected{% endif %}>Very Active</option>
-                            </select>
-                        </form>
-                    </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <strong>Age:</strong><br>
                         <span>{{ current_user.age if current_user.age else 'Not Set' }} years</span>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <strong>Height:</strong><br>
-                        <span>{{ current_user.height if current_user.height else 'Not Set' }} cm</span>
+                        <span>{{ current_user.height_cm if current_user.height_cm else 'Not Set' }} cm</span>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <strong>Weight:</strong><br>
-                        <span>{{ current_user.weight if current_user.weight else 'Not Set' }} kg</span>
+                        <span>{{ current_user.weight_kg if current_user.weight_kg else 'Not Set' }} kg</span>
                     </div>
                 </div>
             </div>
@@ -98,10 +84,12 @@
                     {% for meal in today_meals %}
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <div>
-                            <strong>{{ meal.meal_type.title() }}</strong><br>
-                            <small class="text-muted">{{ meal.date }}</small>
+                            <strong>{{ meal.meal_type }}</strong><br>
+                            <small class="text-muted">{{ meal.food_items[:50] }}{% if meal.food_items|length > 50 %}...{% endif %}</small>
                         </div>
-                        <span class="badge bg-primary">{{ "%.0f"|format(meal.total_calories) }} cal</span>
+                        {% if meal.calories %}
+                        <span class="badge bg-primary">{{ "%.0f"|format(meal.calories) }} cal</span>
+                        {% endif %}
                     </div>
                     {% endfor %}
                 {% else %}
@@ -120,10 +108,12 @@
                     {% for workout in today_workouts %}
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <div>
-                            <strong>{{ workout.exercise_name }}</strong><br>
-                            <small class="text-muted">{{ workout.duration }} min - {{ workout.intensity }}</small>
+                            <strong>{{ workout.workout_type }}</strong><br>
+                            {% if workout.duration_minutes %}<small class="text-muted">{{ workout.duration_minutes }} min</small>{% endif %}
                         </div>
+                        {% if workout.calories_burned %}
                         <span class="badge bg-success">{{ "%.0f"|format(workout.calories_burned) }} cal</span>
+                        {% endif %}
                     </div>
                     {% endfor %}
                 {% else %}
@@ -142,6 +132,11 @@
             </div>
             <div class="card-body">
                 <div class="row">
+                    <div class="col-md-2">
+                        <a href="{{ url_for('suggestions') }}" class="btn btn-outline-success btn-sm w-100">
+                            <i class="fas fa-lightbulb"></i><br>Suggestions
+                        </a>
+                    </div>
                     <div class="col-md-2">
                         <a href="{{ url_for('dietitian') }}" class="btn btn-outline-info btn-sm w-100">
                             <i class="fas fa-robot"></i><br>AI Dietitian

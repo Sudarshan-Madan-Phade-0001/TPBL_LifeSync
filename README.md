@@ -5,11 +5,11 @@ A comprehensive health tracking web application built with Flask and MySQL that 
 ## Features
 
 - **User Authentication**: Secure registration and login system
-- **Meal Tracking**: Log meals with calorie information
-- **Exercise Logging**: Track workouts and calories burned
-- **Body Metrics**: Monitor weight, body fat, and muscle mass
-- **Analytics Dashboard**: Visual charts and health insights
-- **Personalized Recommendations**: Data-driven health tips
+- **Meal Tracking**: Log meals with detailed nutrition information
+- **Workout Logging**: Track various workout types with duration and calories burned
+- **Sleep Tracking**: Monitor sleep hours and quality
+- **Body Metrics**: Track weight, BMI, body fat, and muscle mass
+- **Analytics Dashboard**: Visual charts showing weekly trends
 
 ## Technology Stack
 
@@ -51,17 +51,20 @@ A comprehensive health tracking web application built with Flask and MySQL that 
 
 Update the following line in `app.py` with your MySQL credentials:
 ```python
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://username:password@localhost/health_tracker'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://username:password@localhost/lifesync_db'
 ```
+
+Also update the credentials in `setup_database.py` if different from the default (root/root).
 
 ## Usage
 
 1. **Register**: Create a new account with your basic information
 2. **Dashboard**: View daily calorie summary and recent activities
-3. **Add Meals**: Log your food intake with calorie information
-4. **Add Activities**: Record exercises and calories burned
-5. **Body Metrics**: Track weight and body composition changes
-6. **Analytics**: View weekly trends and get personalized recommendations
+3. **Add Meals**: Log your food intake with nutrition information
+4. **Add Workouts**: Record exercises and calories burned
+5. **Sleep Tracking**: Log sleep hours and quality
+6. **Body Metrics**: Track weight and body composition changes
+7. **Analytics**: View weekly trends and calorie balance charts
 
 ## Project Structure
 
@@ -86,15 +89,16 @@ TPBL Project/
 
 ## Key Features Explained
 
-### Calorie Tracking
-- Log meals with detailed calorie information
-- Track exercise activities and calories burned
-- Calculate net calorie balance
+### Health Tracking
+- Log meals with detailed nutrition information (calories, protein, carbs, fats)
+- Track various workout types with duration and calories burned
+- Monitor sleep patterns and quality
+- Record body metrics including weight, BMI, body fat, and muscle mass
 
 ### Progress Monitoring
-- Visual charts showing weekly trends
+- Visual charts showing weekly calorie intake and burn trends
+- Calorie balance tracking
 - Body metric tracking over time
-- Personalized health recommendations
 
 ### User Experience
 - Responsive design for mobile and desktop
